@@ -1,16 +1,16 @@
 # Intel → Graviton 전환 가이드
 
-> **EMR Graviton4 마이그레이션 — Phase 3~5 상세 (Zeppelin 설정, ARM64 전환, S3 이관, IaC 자동화, 데이터 복원, 네트워크 검증)**
+> **EMR Graviton4 마이그레이션 — Phase 2~4 상세 (Zeppelin 설정, ARM64 전환, S3 이관, IaC 자동화, 데이터 복원, 네트워크 검증)**
 
 ---
 
 ## 목차
 
 1. [EMR 버전 업그레이드 — 목표 릴리스 선정](#1-emr-버전-업그레이드--목표-릴리스-선정)
-2. [Phase 3: Zeppelin 업그레이드](#2-phase-3-zeppelin-업그레이드)
-3. [Phase 4: Graviton4(ARM64) 인스턴스 전환](#3-phase-4-graviton4arm64-인스턴스-전환)
-4. [Phase 3.5: S3 이관 허브 구성 및 데이터 이관](#4-phase-35-s3-이관-허브-구성-및-데이터-이관)
-5. [Phase 5: IaC 자동화 및 클러스터 프로비저닝](#5-phase-5-iac-자동화-및-클러스터-프로비저닝)
+2. [Phase 2: Zeppelin 업그레이드](#2-phase-2-zeppelin-업그레이드)
+3. [Phase 3: Graviton4(ARM64) 인스턴스 전환](#3-phase-3-graviton4arm64-인스턴스-전환)
+4. [Phase 2.5: S3 이관 허브 구성 및 데이터 이관](#4-phase-25-s3-이관-허브-구성-및-데이터-이관)
+5. [Phase 4: IaC 자동화 및 클러스터 프로비저닝](#5-phase-4-iac-자동화-및-클러스터-프로비저닝)
 6. [새 Graviton 클러스터 데이터/설정 복원](#6-새-graviton-클러스터-데이터설정-복원)
 7. [네트워크 및 데이터 소스 연결 검증](#7-네트워크-및-데이터-소스-연결-검증)
 8. [통합 테스트 및 성능 검증](#8-통합-테스트-및-성능-검증)
@@ -61,7 +61,7 @@
 
 ---
 
-## 2. Phase 3: Zeppelin 업그레이드
+## 2. Phase 2: Zeppelin 업그레이드
 
 ### 2.1 설정 파일 마이그레이션
 
@@ -173,7 +173,7 @@ sudo /usr/lib/zeppelin/bin/zeppelin-daemon.sh restart
 
 ---
 
-## 3. Phase 4: Graviton4(ARM64) 인스턴스 전환
+## 3. Phase 3: Graviton4(ARM64) 인스턴스 전환
 
 ### 3.1 ARM64 AMI 선택
 
@@ -255,9 +255,9 @@ pip3 install --no-binary :all: <패키지명>
 
 ---
 
-## 4. Phase 3.5: S3 이관 허브 구성 및 데이터 이관
+## 4. Phase 2.5: S3 이관 허브 구성 및 데이터 이관
 
-스테이징 환경에서 코드 변환(Phase 1~3)이 완료되면, 모든 결과물을 S3에 체계적으로 업로드한다. 이 S3 이관 허브가 기존 환경과 새 Graviton 환경을 잇는 중간 저장소 역할을 한다.
+스테이징 환경에서 코드 변환(Phase 1~2)이 완료되면, 모든 결과물을 S3에 체계적으로 업로드한다. 이 S3 이관 허브가 기존 환경과 새 Graviton 환경을 잇는 중간 저장소 역할을 한다.
 
 ### 4.1 S3 이관 허브 구조
 
@@ -344,7 +344,7 @@ aws s3 sync ${S3_BUCKET}/ebs-data/ /data/
 
 ---
 
-## 5. Phase 5: IaC 자동화 및 클러스터 프로비저닝
+## 5. Phase 4: IaC 자동화 및 클러스터 프로비저닝
 
 ### 4.1 Terraform `aws_emr_cluster` 예시
 

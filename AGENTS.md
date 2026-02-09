@@ -10,7 +10,7 @@ Zeppelin 기반 EMR 환경을 Intel(x86-64)에서 Graviton4(ARM64)로 전환하�
 emr/
 ├── 01-emr-migration-overview.md      # 메인 가이드: 마이그레이션 배경, 목표, 4대 축, 인벤토리 조사
 ├── 02-python2-to-python3-guide.md    # Phase 1: Python 2→3 전환 (패키지 호환성, 자동 변환, 노트북 변환)
-├── 03-intel-to-graviton-guide.md     # Phase 3~5: Zeppelin 업그레이드, ARM64 전환, IaC 자동화
+├── 03-intel-to-graviton-guide.md     # Phase 2~4: Zeppelin 업그레이드, ARM64 전환, IaC 자동화
 └── 04-migration-checklist.md         # 실행 체크리스트: Phase별 체크리스트, Go/No-Go, 롤백
 ```
 
@@ -30,13 +30,13 @@ emr/
 1. **Phase 0** — 현행 환경 보존 및 인벤토리 조사 (AMI 생성, EBS 스냅샷, 버전/패키지/노트북/인프라 기록)
 2. **Phase 0.5** — 스테이징 환경 구성 (기존 AMI에서 테스트용 인스턴스 생성, 운영 무중단)
 3. **Phase 1** — Python 2 → 3 전환 (스테이징에서 수행, 가장 리스크 크고 작업량 많음)
-4. **Phase 3** — Zeppelin 0.8 → 0.10+ 업그레이드 설정 (스테이징에서 수행)
-5. **Phase 3.5** — S3 이관 허브 구성 (변환된 노트북/설정/스크립트/데이터를 S3에 체계적으로 업로드)
-6. **Phase 4** — Intel → Graviton4(ARM64) 인스턴스 전환 (새 EMR 7.x Graviton 클러스터 생성)
-7. **Phase 5** — IaC 자동화 (Terraform) + 새 클러스터 데이터/설정 복원
-8. **Phase 5.7** — 네트워크 및 데이터 소스 연결 검증 (S3, RDS, Redshift, YARN 내부 통신 등)
-9. **Phase 6** — 통합 테스트 및 성능 검증
-10. **Phase 7** — 프로덕션 전환 (Blue-Green Cutover)
+4. **Phase 2** — Zeppelin 0.8 → 0.10+ 업그레이드 설정 (스테이징에서 수행)
+5. **Phase 2.5** — S3 이관 허브 구성 (변환된 노트북/설정/스크립트/데이터를 S3에 체계적으로 업로드)
+6. **Phase 3** — Intel → Graviton4(ARM64) 인스턴스 전환 (새 EMR 7.x Graviton 클러스터 생성)
+7. **Phase 4** — IaC 자동화 (Terraform) + 새 클러스터 데이터/설정 복원
+8. **Phase 4.7** — 네트워크 및 데이터 소스 연결 검증 (S3, RDS, Redshift, YARN 내부 통신 등)
+9. **Phase 5** — 통합 테스트 및 성능 검증
+10. **Phase 6** — 프로덕션 전환 (Blue-Green Cutover)
 
 > 운영 환경 상태를 먼저 보존(AMI)하고, 스테이징에서 소프트웨어 호환성을 확보한 뒤, 새 Graviton 클러스터로 전환한다. EMR은 in-place 업그레이드가 불가능하므로 반드시 새 클러스터를 생성하여 Blue-Green 방식으로 전환한다.
 
@@ -52,7 +52,7 @@ emr/
 ### 운영 중인 EC2/EMR 마이그레이션 시
 
 - Phase 0에서 반드시 AMI 생성 (원본 상태 완전 백업, --no-reboot 옵션으로 운영 무중단)
-- Phase 1~3 코드 변환은 반드시 스테이징 환경에서 수행 (운영에 직접 변경 금지)
+- Phase 1~2 코드 변환은 반드시 스테이징 환경에서 수행 (운영에 직접 변경 금지)
 - EMR은 in-place 업그레이드 불가 — 새 클러스터 생성 후 Blue-Green 전환 필수
 - S3 이관 허브를 중심으로 기존 환경 ↔ 새 환경 간 데이터 이동
 - 새 클러스터 설정 복원 시 interpreter.json 등은 머지 방식 (단순 덮어쓰기 금지)
