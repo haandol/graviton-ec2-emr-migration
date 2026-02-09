@@ -193,7 +193,7 @@
 
 ## Phase 6: 프로덕션 전환
 
-> 상세: [Intel → Graviton 전환 가이드 §6](03-intel-to-graviton-guide.md#6-프로덕션-전환-cutover)
+> 상세: [Intel → Graviton 전환 가이드 §9](03-intel-to-graviton-guide.md#9-프로덕션-전환-cutover)
 
 ### 전환 전 사전 작업
 
@@ -228,7 +228,7 @@
 
 ## 롤백 준비
 
-> 상세: [Intel → Graviton 전환 가이드 §7](03-intel-to-graviton-guide.md#7-롤백-절차)
+> 상세: [Intel → Graviton 전환 가이드 §10](03-intel-to-graviton-guide.md#10-롤백-절차)
 
 | #   | 항목                               | 완료 | 날짜 | 담당자 | 비고 |
 | --- | ---------------------------------- | ---- | ---- | ------ | ---- |
