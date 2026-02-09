@@ -509,6 +509,7 @@ bash 스크립트를 만들어줘. 다음을 순서대로 검증해야 해:
 3. Python 3 버전 및 필수 패키지 import
 4. PySpark DataFrame 기본 연산
 결과를 PASS/FAIL로 출력하고, 실패 시 원인 정보도 포함해줘.
+결과를 test-results.json 파일로도 저장해줘.
 ```
 
 ### 11.2 체크리스트 진행 상황 업데이트

@@ -346,7 +346,7 @@ aws s3 sync ${S3_BUCKET}/ebs-data/ /data/
 
 ## 5. Phase 4: IaC 자동화 및 클러스터 프로비저닝
 
-### 4.1 Terraform `aws_emr_cluster` 예시
+### 5.1 Terraform `aws_emr_cluster` 예시
 
 ```hcl
 resource "aws_emr_cluster" "zeppelin_migration" {
@@ -411,7 +411,7 @@ resource "aws_emr_cluster" "zeppelin_migration" {
 }
 ```
 
-### 4.2 부트스트랩 스크립트: Python 3 환경 셋업 및 Zeppelin 설치 자동화
+### 5.2 부트스트랩 스크립트: Python 3 환경 셋업 및 Zeppelin 설치 자동화
 
 ```bash
 #!/bin/bash
@@ -450,7 +450,7 @@ ENVEOF
 echo "부트스트랩 완료"
 ```
 
-### 4.3 노트북 S3 동기화 스크립트
+### 5.3 노트북 S3 동기화 스크립트
 
 ```bash
 #!/bin/bash
@@ -638,7 +638,7 @@ aws glue get-databases --query 'DatabaseList[*].Name' 2>&1
 
 ## 8. 통합 테스트 및 성능 검증
 
-### 5.1 기능 테스트
+### 8.1 기능 테스트
 
 #### Zeppelin UI 접속 확인
 
@@ -715,7 +715,7 @@ for p in nb['body']['paragraphs']:
 "
 ```
 
-### 5.2 EMR 스텝 자동 테스트
+### 8.2 EMR 스텝 자동 테스트
 
 ```bash
 # EMR 클러스터에 테스트 Spark 잡 제출
@@ -743,7 +743,7 @@ aws emr ssh --cluster-id j-XXXXXXXXXXXX --command \
   "cat /var/log/spark/spark-step*.log | tail -50"
 ```
 
-### 5.3 성능 벤치마크
+### 8.3 성능 벤치마크
 
 동일 워크로드를 Intel과 Graviton4 환경에서 실행하여 비교한다:
 
