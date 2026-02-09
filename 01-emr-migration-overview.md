@@ -11,7 +11,6 @@
 | [Python 2 → 3 전환 가이드](02-python2-to-python3-guide.md)    | 코드 변환, 패키지 호환성, Zeppelin 노트북 변환 상세            |
 | [Intel → Graviton 전환 가이드](03-intel-to-graviton-guide.md) | EMR 업그레이드, Zeppelin 설정, ARM64 인스턴스 전환, IaC 자동화 |
 | [실행 체크리스트](04-migration-checklist.md)                  | Phase별 체크리스트, Go/No-Go 기준, 롤백 절차                   |
-| [Kiro 활용 가이드](kiro-migration-guide.md)                   | Kiro를 활용한 Phase별 자동화 및 프롬프트 레시피                |
 
 ---
 

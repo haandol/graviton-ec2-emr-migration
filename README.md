@@ -32,7 +32,7 @@
 ```text
 emr/
 ├── AGENTS.md                          # Kiro 프로젝트 지침
-├── kiro-migration-guide.md            # 이 문서
+├── README.md                          # 이 문서
 ├── 01-emr-migration-overview.md
 ├── 02-python2-to-python3-guide.md
 ├── 03-intel-to-graviton-guide.md
