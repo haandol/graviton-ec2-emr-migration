@@ -23,6 +23,12 @@
 
 ---
 
+## 참고 자료
+
+- [AWS 공식 Graviton 마이그레이션 가이드](https://github.com/aws/aws-graviton-getting-started/blob/main/transition-guide.md)
+
+---
+
 ## 1. 사전 준비
 
 ### 1.1 프로젝트 디렉터리 구성
