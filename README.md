@@ -2,6 +2,8 @@
 
 > **Kiro(CLI)를 실무 도우미로 활용하여 각 Phase의 작업을 자동화하고 가속하는 방법**
 
+> **[주의] AI 에이전트는 항상 올바르게 동작하지 않습니다.** Kiro가 생성하는 스크립트와 명령어는 잘못된 리소스를 대상으로 하거나, 의도하지 않은 변경을 수행할 수 있습니다. **에이전트가 제안하는 모든 명령어를 실행 전에 반드시 직접 읽고 검토한 뒤 승인하세요.** 특히 AWS 리소스를 생성·수정·삭제하는 명령어, 운영 환경에 영향을 줄 수 있는 작업은 각별히 주의해야 합니다.
+
 ---
 
 ## 목차
@@ -22,15 +24,31 @@
 
 ## 참고 자료
 
+- [Kiro CLI 설치 가이드](https://kiro.dev/cli/)
 - [AWS 공식 Graviton 마이그레이션 가이드](https://github.com/aws/aws-graviton-getting-started/blob/main/transition-guide.md)
 
 ---
 
 ## 1. 사전 준비
 
-### 1.1 프로젝트 디렉터리 구성
+### 1.1 레포지토리 클론 및 Kiro 실행
 
-마이그레이션 작업 전용 디렉터리에서 Kiro를 실행한다. 기존 플레이북 문서들과 함께 작업 파일을 관리한다:
+이 레포지토리를 클론한 후, 해당 디렉터리에서 Kiro CLI를 실행해야 한다. Kiro는 프로젝트 루트의 `AGENTS.md`를 자동으로 읽어 마이그레이션 컨텍스트를 인지한다.
+
+```bash
+# 1) 레포지토리 클론
+git clone https://github.com/haandol/graviton-ec2-emr-migration.git
+cd graviton-ec2-emr-migration
+
+# 2) Kiro CLI 실행 (반드시 클론한 디렉터리 안에서 실행)
+kiro
+```
+
+> Kiro는 실행 시 현재 디렉터리의 `AGENTS.md`를 자동으로 참조하므로, 반드시 이 레포지토리 루트에서 실행해야 플레이북 문서와 마이그레이션 컨텍스트를 올바르게 인식한다.
+
+### 1.2 프로젝트 디렉터리 구성
+
+레포지토리의 구조는 다음과 같다. 마이그레이션 과정에서 생성되는 작업 파일도 이 디렉터리에서 함께 관리한다:
 
 ```text
 emr/
@@ -45,27 +63,22 @@ emr/
 └── test/                              # 테스트 스크립트
 ```
 
-### 1.2 AGENTS.md의 역할
-
-`AGENTS.md` 파일은 Kiro가 프로젝트 컨텍스트를 자동으로 이해하도록 돕는 핵심 파일이다. 이 프로젝트에는 이미 AGENTS.md가 설정되어 있으므로, Kiro를 실행하면 마이그레이션 Phase 순서, 현재/목표 환경, 핵심 주의사항을 자동으로 인지한다.
-
 ---
 
 ## 2. Phase 0: 현행 환경 보존 및 인벤토리 조사 자동화
+
+> **프롬프트 작성 팁**: 아래 예시의 인스턴스 ID, AMI ID 등은 샘플 값이다. 실제 사용 시 자신의 환경에 맞는 구체적인 값을 넣어서 Kiro에 요청한다.
 
 ### 2.1 기존 EC2/EMR 상태 백업 (AMI 생성)
 
 운영 환경을 변경하기 전에 현재 상태를 완전히 보존해야 한다. Kiro에 AMI 생성 스크립트를 요청한다:
 
 ```
-프롬프트: 현재 운영 중인 EC2 인스턴스(또는 EMR 클러스터의 Master/Core 노드)의
-AMI를 생성하는 bash 스크립트를 작성해줘. 다음 요구사항을 따라줘:
-- 인스턴스 ID를 인자로 받음
+프롬프트: EC2 인스턴스 i-0abc1234def56789 의 AMI를 생성하는
+bash 스크립트를 작성해줘. 다음 요구사항을 따라줘:
 - --no-reboot 옵션으로 운영 무중단 AMI 생성
 - Purpose=migration-backup 태그 자동 부여
 - AMI 생성 완료까지 대기 후 상태 확인
-- EMR 클러스터인 경우 aws emr list-instances로 노드별 인스턴스 ID를
-  자동 추출하는 옵션도 포함
 01-emr-migration-overview.md의 Phase 0 AMI 생성 절차를 참고해줘.
 ```
 
@@ -76,9 +89,9 @@ AMI를 생성하는 bash 스크립트를 작성해줘. 다음 요구사항을 �
 > - 특정 볼륨만 **다른 인스턴스에 독립적으로 부착**해야 하는 경우
 
 ```
-프롬프트: EC2 인스턴스에 부착된 모든 EBS 볼륨을 조회하고,
-각 볼륨의 스냅샷을 자동으로 생성하는 스크립트를 만들어줘.
-인스턴스 ID를 인자로 받고, 스냅샷에 migration-backup 태그를 달아줘.
+프롬프트: EC2 인스턴스 i-0abc1234def56789 에 부착된 모든 EBS 볼륨을
+조회하고, 각 볼륨의 스냅샷을 자동으로 생성하는 스크립트를 만들어줘.
+스냅샷에 migration-backup 태그를 달아줘.
 ```
 
 ### 2.3 현재 환경 정보 수집 스크립트 생성
@@ -86,19 +99,12 @@ AMI를 생성하는 bash 스크립트를 작성해줘. 다음 요구사항을 �
 EMR 클러스터에 SSH 접속 후, Kiro에 다음과 같이 요청한다:
 
 ```
-프롬프트: 현재 EMR 클러스터의 전체 인벤토리를 수집하는 bash 스크립트를
-작성해줘. EMR/Spark/Zeppelin/Java/Python 버전, pip 패키지 목록,
+프롬프트: EC2 인스턴스 i-0abc1234def56789 에 SSH 접속해서
+전체 인벤토리를 수집하는 bash 스크립트를 작성해줘.
+Zeppelin/Java/Python 버전, pip 패키지 목록,
 Zeppelin 노트북 수, 인스턴스 타입, VPC/Subnet/보안그룹/IAM 정보를
 모두 수집해서 하나의 JSON 파일로 출력해야 해.
-클러스터 ID는 인자로 받도록 해줘.
 ```
-
-Kiro가 생성하는 스크립트는 다음을 자동 수집한다:
-
-- `aws emr describe-cluster`로 클러스터 메타데이터
-- `pip freeze`로 Python 패키지 목록
-- `find`로 Zeppelin 노트북 개수
-- 모든 결과를 구조화된 JSON으로 출력
 
 ### 2.4 패키지 호환성 매트릭스 자동 생성
 
@@ -128,11 +134,10 @@ Phase 1~3의 코드 변환 및 테스트를 운영 중인 환경에서 직접 �
 ### 3.1 스테이징 인스턴스 생성 스크립트
 
 ```
-프롬프트: Phase 0에서 생성한 AMI로 스테이징 인스턴스를 만드는
-bash 스크립트를 작성해줘. 다음을 인자로 받아야 해:
-- AMI ID (Phase 0에서 생성한 것)
-- 인스턴스 타입 (기존과 동일한 Intel 타입)
-- Subnet ID, Security Group ID, Key Name
+프롬프트: Phase 0에서 생성한 AMI ami-0abc1234def56789 로
+스테이징 인스턴스를 만드는 bash 스크립트를 작성해줘.
+인스턴스 타입은 기존과 동일한 m5.xlarge, Subnet은 subnet-xxxx,
+보안그룹은 sg-xxxx, 키는 my-key 를 사용해줘.
 Name=emr-staging-py3 태그를 자동 부여하고,
 생성된 인스턴스의 퍼블릭 IP와 SSH 접속 명령어를 출력해줘.
 01-emr-migration-overview.md의 Phase 0.5 섹션을 참고해줘.
@@ -143,10 +148,10 @@ Name=emr-staging-py3 태그를 자동 부여하고,
 EMR 관리형 클러스터인 경우:
 
 ```
-프롬프트: 현재 운영 EMR 클러스터와 동일한 설정으로 스테이징 EMR 클러스터를
-생성하는 AWS CLI 명령어를 만들어줘. inventory.json에서 EMR 릴리스,
-인스턴스 타입, VPC/Subnet/보안그룹 정보를 읽어서 반영해줘.
-클러스터 이름은 "staging-migration-test"로 하고,
+프롬프트: inventory.json을 읽어서 EMR 릴리스, 인스턴스 타입,
+VPC/Subnet/보안그룹 정보를 반영한 스테이징 EMR 클러스터를
+생성하는 AWS CLI 명령어를 만들어줘.
+클러스터 이름은 "staging-migration-test"로 해줘.
 01-emr-migration-overview.md의 Phase 0.5 섹션을 참고해줘.
 ```
 
