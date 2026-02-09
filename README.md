@@ -74,7 +74,7 @@ emr/
 운영 환경을 변경하기 전에 현재 상태를 완전히 보존해야 한다. Kiro에 AMI 생성 스크립트를 요청한다:
 
 ```
-프롬프트: EC2 인스턴스 i-0abc1234def56789 의 AMI를 생성하는
+예시 프롬프트: EC2 인스턴스 i-0abc1234def56789 의 AMI를 생성하는
 bash 스크립트를 작성해줘. 다음 요구사항을 따라줘:
 - --no-reboot 옵션으로 운영 무중단 AMI 생성
 - Purpose=migration-backup 태그 자동 부여
@@ -89,7 +89,7 @@ bash 스크립트를 작성해줘. 다음 요구사항을 따라줘:
 > - 특정 볼륨만 **다른 인스턴스에 독립적으로 부착**해야 하는 경우
 
 ```
-프롬프트: EC2 인스턴스 i-0abc1234def56789 에 부착된 모든 EBS 볼륨을
+예시 프롬프트: EC2 인스턴스 i-0abc1234def56789 에 부착된 모든 EBS 볼륨을
 조회하고, 각 볼륨의 스냅샷을 자동으로 생성하는 스크립트를 만들어줘.
 스냅샷에 migration-backup 태그를 달아줘.
 ```
@@ -99,7 +99,7 @@ bash 스크립트를 작성해줘. 다음 요구사항을 따라줘:
 EMR 클러스터에 SSH 접속 후, Kiro에 다음과 같이 요청한다:
 
 ```
-프롬프트: EC2 인스턴스 i-0abc1234def56789 에 SSH 접속해서
+예시 프롬프트: EC2 인스턴스 i-0abc1234def56789 에 SSH 접속해서
 전체 인벤토리를 수집하는 bash 스크립트를 작성해줘.
 Zeppelin/Java/Python 버전, pip 패키지 목록,
 Zeppelin 노트북 수, 인스턴스 타입, VPC/Subnet/보안그룹/IAM 정보를
@@ -109,7 +109,7 @@ Zeppelin 노트북 수, 인스턴스 타입, VPC/Subnet/보안그룹/IAM 정보�
 ### 2.4 패키지 호환성 매트릭스 자동 생성
 
 ```
-프롬프트: requirements-current-py2.txt 파일을 읽고, 각 패키지의
+예시 프롬프트: requirements-current-py2.txt 파일을 읽고, 각 패키지의
 Python 3 호환 여부와 ARM64(aarch64) 휠 제공 여부를 조사해서
 마크다운 테이블로 정리해줘. 02-python2-to-python3-guide.md의
 호환성 매트릭스 템플릿 형식을 따라줘.
@@ -120,7 +120,7 @@ Python 3 호환 여부와 ARM64(aarch64) 휠 제공 여부를 조사해서
 수집된 결과를 Kiro에 넘겨 자동 분석한다:
 
 ```
-프롬프트: inventory.json을 분석해서 01-emr-migration-overview.md의
+예시 프롬프트: inventory.json을 분석해서 01-emr-migration-overview.md의
 인벤토리 결과 템플릿을 채워줘. 마이그레이션 시 리스크가 될 수 있는
 항목이 있으면 별도로 표시해줘.
 ```
@@ -134,10 +134,9 @@ Phase 1~2의 코드 변환 및 테스트를 운영 중인 환경에서 직접 �
 ### 3.1 스테이징 인스턴스 생성 스크립트
 
 ```
-프롬프트: Phase 0에서 생성한 AMI ami-0abc1234def56789 로
+예시 프롬프트: inventory.json과 Phase 0에서 생성한 AMI ID를 읽어서,
+기존과 동일한 인스턴스 타입/Subnet/보안그룹/키페어로
 스테이징 인스턴스를 만드는 bash 스크립트를 작성해줘.
-인스턴스 타입은 기존과 동일한 m5.xlarge, Subnet은 subnet-xxxx,
-보안그룹은 sg-xxxx, 키는 my-key 를 사용해줘.
 Name=emr-staging-py3 태그를 자동 부여하고,
 생성된 인스턴스의 퍼블릭 IP와 SSH 접속 명령어를 출력해줘.
 01-emr-migration-overview.md의 Phase 0.5 섹션을 참고해줘.
@@ -148,7 +147,7 @@ Name=emr-staging-py3 태그를 자동 부여하고,
 EMR 관리형 클러스터인 경우:
 
 ```
-프롬프트: inventory.json을 읽어서 EMR 릴리스, 인스턴스 타입,
+예시 프롬프트: inventory.json을 읽어서 EMR 릴리스, 인스턴스 타입,
 VPC/Subnet/보안그룹 정보를 반영한 스테이징 EMR 클러스터를
 생성하는 AWS CLI 명령어를 만들어줘.
 클러스터 이름은 "staging-migration-test"로 해줘.
@@ -158,7 +157,7 @@ VPC/Subnet/보안그룹 정보를 반영한 스테이징 EMR 클러스터를
 ### 3.3 스테이징 환경 검증
 
 ```
-프롬프트: 스테이징 인스턴스/클러스터가 기존 환경과 동일하게 동작하는지
+예시 프롬프트: 스테이징 인스턴스/클러스터가 기존 환경과 동일하게 동작하는지
 검증하는 스크립트를 만들어줘.
 - Zeppelin UI 접속 확인
 - Spark 인터프리터 동작 확인
@@ -171,7 +170,7 @@ VPC/Subnet/보안그룹 정보를 반영한 스테이징 EMR 클러스터를
 스테이징은 기존 AMI(Python 2)에서 생성되므로, Phase 1 변환 코드를 테스트하려면 먼저 Python 3을 설치해야 한다:
 
 ```
-프롬프트: 스테이징 인스턴스에 Python 3을 설치하고,
+예시 프롬프트: 스테이징 인스턴스에 Python 3을 설치하고,
 기존 Python 2와 공존할 수 있도록 설정하는 스크립트를 만들어줘.
 python3 명령어로 실행할 수 있어야 하고, pip3도 함께 설치해줘.
 기존 Python 2 환경은 건드리지 않아야 해.
@@ -190,7 +189,7 @@ python3 명령어로 실행할 수 있어야 하고, pip3도 함께 설치해줘
 단일 파일 또는 디렉터리 단위로 Kiro에 변환을 요청한다:
 
 ```
-프롬프트: scripts/etl_pipeline.py 파일을 Python 2에서 Python 3로
+예시 프롬프트: scripts/etl_pipeline.py 파일을 Python 2에서 Python 3로
 변환해줘. 다음 사항에 특히 주의해줘:
 - 정수 나눗셈이 float로 바뀌는 곳 (// 로 변경 필요 여부)
 - unicode/str 인코딩 처리
@@ -204,7 +203,7 @@ python3 명령어로 실행할 수 있어야 하고, pip3도 함께 설치해줘
 Zeppelin 노트북은 JSON 형식이므로 Kiro가 직접 파싱하여 Python 셀만 추출·변환할 수 있다:
 
 ```
-프롬프트: notebooks/ 디렉터리에 있는 Zeppelin 노트북(note.json) 파일들을
+예시 프롬프트: notebooks/ 디렉터리에 있는 Zeppelin 노트북(note.json) 파일들을
 읽어서, %python 또는 %pyspark 셀의 코드를 Python 3로 변환해줘.
 02-python2-to-python3-guide.md의 변환 워크플로를 따르고,
 변환 전 반드시 원본을 .bak으로 백업해줘.
@@ -213,10 +212,10 @@ Zeppelin 노트북은 JSON 형식이므로 Kiro가 직접 파싱하여 Python �
 
 ### 4.3 나눗셈 연산자 전수 검사
 
-Python 2→3에서 가장 위험한 변경인 나눗셈 동작 차이를 Kiro로 탐색한다:
+Python 2→3에서 나눗셈 동작 차이는 오류 없이 결과값만 달라지므로 발견하기 어렵다 (예: `5 / 2` → Python 2는 `2`(정수), Python 3은 `2.5`(float)). Kiro로 전수 탐색한다:
 
 ```
-프롬프트: notebooks/ 와 scripts/ 디렉터리에서 정수 나눗셈(/)이
+예시 프롬프트: notebooks/ 와 scripts/ 디렉터리에서 정수 나눗셈(/)이
 사용된 모든 위치를 찾아줘. 각 위치에서 / 를 // 로 바꿔야 하는지,
 아니면 float 결과가 의도된 것인지 분석해줘.
 ```
@@ -226,7 +225,7 @@ Python 2→3에서 가장 위험한 변경인 나눗셈 동작 차이를 Kiro로
 Python 2 전용 패키지의 대체재를 찾을 때:
 
 ```
-프롬프트: requirements-current-py2.txt에서 Python 3에서
+예시 프롬프트: requirements-current-py2.txt에서 Python 3에서
 사용할 수 없는 패키지를 찾아줘. 각 패키지에 대해
 02-python2-to-python3-guide.md의 대체 패키지 표를 참고하여
 대체 방안을 제시해줘. ARM64 휠 제공 여부도 확인해줘.
@@ -237,7 +236,7 @@ Python 2 전용 패키지의 대체재를 찾을 때:
 변환이 완료되면 스테이징에서 Python 3으로 실행하여 기존 결과와 비교한다:
 
 ```
-프롬프트: 스테이징 인스턴스에서 변환된 Python 3 코드의 동작을 검증해줘.
+예시 프롬프트: 스테이징 인스턴스에서 변환된 Python 3 코드의 동작을 검증해줘.
 - notebooks/ 디렉터리의 변환된 노트북을 Python 3로 실행
 - 기존 Python 2 실행 결과와 비교하여 차이점 보고
 - 특히 나눗셈 결과, 문자열 인코딩, dict 순서 차이에 주의
@@ -251,7 +250,7 @@ Python 2 전용 패키지의 대체재를 찾을 때:
 ### 5.1 설정 파일 변환
 
 ```
-프롬프트: 기존 Zeppelin 0.8의 설정 파일들(zeppelin-site.xml,
+예시 프롬프트: 기존 Zeppelin 0.8의 설정 파일들(zeppelin-site.xml,
 zeppelin-env.sh, interpreter.json)을 읽고,
 Zeppelin 0.10+ 호환 설정으로 변환해줘.
 03-intel-to-graviton-guide.md의 Phase 2 섹션을 참고해서
@@ -261,7 +260,7 @@ Python 3 인터프리터 경로 설정도 포함해줘.
 ### 5.2 interpreter.json 마이그레이션
 
 ```
-프롬프트: 기존 interpreter.json을 분석해서 Zeppelin 0.10+에서
+예시 프롬프트: 기존 interpreter.json을 분석해서 Zeppelin 0.10+에서
 변경된 인터프리터 설정 키를 찾아줘. PYSPARK_PYTHON,
 spark.pyspark.python 등의 경로가 모두 /usr/bin/python3으로
 설정되어 있는지 확인하고 수정해줘.
@@ -276,7 +275,7 @@ spark.pyspark.python 등의 경로가 모두 /usr/bin/python3으로
 ### 6.1 S3 이관 허브 구성 스크립트
 
 ```
-프롬프트: 스테이징 환경에서 변환 완료된 결과물을 S3 이관 허브에
+예시 프롬프트: 스테이징 환경에서 변환 완료된 결과물을 S3 이관 허브에
 업로드하는 bash 스크립트를 만들어줘.
 03-intel-to-graviton-guide.md의 Phase 2.5 S3 이관 허브 구조를 참고해서,
 다음을 체계적으로 업로드해야 해:
@@ -291,7 +290,7 @@ S3 버킷명은 인자로 받도록 해줘.
 ### 6.2 HDFS 데이터 이관 (해당 시)
 
 ```
-프롬프트: EMR 클러스터의 HDFS에 있는 데이터를 S3로 이관하는
+예시 프롬프트: EMR 클러스터의 HDFS에 있는 데이터를 S3로 이관하는
 스크립트를 만들어줘. hadoop distcp를 사용하고,
 대상 HDFS 경로와 S3 버킷을 인자로 받도록 해줘.
 이관 전후 파일 수와 총 크기를 비교하여 정합성을 검증해줘.
@@ -300,7 +299,7 @@ S3 버킷명은 인자로 받도록 해줘.
 ### 6.3 EBS 데이터 이관 (해당 시)
 
 ```
-프롬프트: 기존 EC2에 부착된 EBS 데이터 볼륨의 내용을 S3로 이관하거나,
+예시 프롬프트: 기존 EC2에 부착된 EBS 데이터 볼륨의 내용을 S3로 이관하거나,
 EBS 스냅샷에서 새 볼륨을 생성하여 새 Graviton 인스턴스에 부착하는
 두 가지 방법의 스크립트를 각각 만들어줘.
 03-intel-to-graviton-guide.md의 EBS 볼륨 데이터 이관 섹션을 참고해줘.
@@ -309,7 +308,7 @@ EBS 스냅샷에서 새 볼륨을 생성하여 새 Graviton 인스턴스에 부�
 ### 6.4 Hive Metastore 이관 확인
 
 ```
-프롬프트: 현재 EMR 클러스터가 Glue Data Catalog을 사용하는지,
+예시 프롬프트: 현재 EMR 클러스터가 Glue Data Catalog을 사용하는지,
 로컬 Hive Metastore를 사용하는지 확인하는 방법을 알려줘.
 로컬 Metastore인 경우 덤프 및 이관 스크립트를 만들어줘.
 Glue Data Catalog인 경우 별도 이관이 불필요함을 확인해줘.
@@ -322,7 +321,7 @@ Glue Data Catalog인 경우 별도 이관이 불필요함을 확인해줘.
 ### 7.1 인스턴스 매핑 검증
 
 ```
-프롬프트: inventory.json에서 현재 사용 중인 인스턴스 타입을 추출하고,
+예시 프롬프트: inventory.json에서 현재 사용 중인 인스턴스 타입을 추출하고,
 03-intel-to-graviton-guide.md의 인스턴스 타입 매핑표를 참고하여
 Graviton 대응 인스턴스를 매핑해줘. vCPU와 메모리가 동일한지 검증하고,
 매핑 결과를 테이블로 정리해줘.
@@ -331,7 +330,7 @@ Graviton 대응 인스턴스를 매핑해줘. vCPU와 메모리가 동일한지 
 ### 7.2 ARM64 패키지 호환성 최종 점검
 
 ```
-프롬프트: requirements-py3.txt의 모든 패키지에 대해
+예시 프롬프트: requirements-py3.txt의 모든 패키지에 대해
 aarch64/arm64 휠이 PyPI에 제공되는지 확인해줘.
 휠이 없는 패키지는 소스 빌드에 필요한 시스템 의존성(gcc,
 python3-devel 등)과 함께 정리해줘.
@@ -340,7 +339,7 @@ python3-devel 등)과 함께 정리해줘.
 ### 7.3 부트스트랩 스크립트 커스터마이징
 
 ```
-프롬프트: 03-intel-to-graviton-guide.md의 bootstrap-graviton.sh를
+예시 프롬프트: 03-intel-to-graviton-guide.md의 bootstrap-graviton.sh를
 기반으로, 우리의 requirements-py3.txt에 있는 패키지를 모두 설치하는
 커스텀 부트스트랩 스크립트를 만들어줘. ARM64 휠이 없는 패키지는
 --no-binary 옵션으로 소스 빌드하도록 해줘.
@@ -351,7 +350,7 @@ python3-devel 등)과 함께 정리해줘.
 EMR 관리형 클러스터가 아닌 단독 EC2에서 Zeppelin을 운영하는 경우:
 
 ```
-프롬프트: 03-intel-to-graviton-guide.md의 부록(§11 단독 EC2 절차)을
+예시 프롬프트: 03-intel-to-graviton-guide.md의 부록(§11 단독 EC2 절차)을
 참고해서, Amazon Linux 2023 ARM64에 Spark 3.5.x와 Zeppelin 0.12.0을
 수동 설치하는 부트스트랩 스크립트를 만들어줘.
 requirements-py3.txt의 패키지도 모두 설치하고,
@@ -368,7 +367,7 @@ Kiro는 기존 플레이북 문서를 참조하여 IaC 템플릿을 정확하게
 ### 8.1 Terraform 모듈 생성
 
 ```
-프롬프트: 03-intel-to-graviton-guide.md의 Terraform 예시를 기반으로,
+예시 프롬프트: 03-intel-to-graviton-guide.md의 Terraform 예시를 기반으로,
 실제 사용 가능한 Terraform 모듈을 만들어줘. 다음을 포함해야 해:
 - variables.tf: 인스턴스 타입, 클러스터 이름, VPC/Subnet 등을 변수로
 - main.tf: aws_emr_cluster 리소스 (m8g 인스턴스, EMR 7.x)
@@ -383,7 +382,7 @@ Kiro는 기존 플레이북 문서를 참조하여 IaC 템플릿을 정확하게
 EMR 관리형 클러스터가 아닌 단독 EC2에서 Zeppelin을 운영하는 경우:
 
 ```
-프롬프트: 03-intel-to-graviton-guide.md의 부록(§11 단독 EC2 절차)을
+예시 프롬프트: 03-intel-to-graviton-guide.md의 부록(§11 단독 EC2 절차)을
 참고해서, 단독 EC2 Graviton4 인스턴스를 프로비저닝하는
 Terraform 모듈을 만들어줘. 다음을 포함해야 해:
 - variables.tf: 인스턴스 타입(m8g.xlarge), AMI(Amazon Linux 2023 ARM64),
@@ -400,7 +399,7 @@ Terraform 모듈을 만들어줘. 다음을 포함해야 해:
 이미 Terraform 코드가 있는 경우:
 
 ```
-프롬프트: terraform/ 디렉터리의 기존 EMR 클러스터 Terraform 코드를
+예시 프롬프트: terraform/ 디렉터리의 기존 EMR 클러스터 Terraform 코드를
 읽고, Graviton4 마이그레이션에 맞게 수정해줘.
 - 인스턴스 타입을 m5→m8g, r5→r8g로 변경
 - EMR 릴리스를 7.x로 변경
@@ -423,7 +422,7 @@ IaC로 새 Graviton 클러스터를 프로비저닝한 후, S3 이관 허브에�
 ### 9.1 노트북 및 설정 복원 스크립트
 
 ```
-프롬프트: 새 Graviton EMR 클러스터에서 S3 이관 허브의 데이터를
+예시 프롬프트: 새 Graviton EMR 클러스터에서 S3 이관 허브의 데이터를
 복원하는 bash 스크립트를 만들어줘.
 03-intel-to-graviton-guide.md의 §6(새 클러스터 데이터/설정 복원)을 참고해서:
 - S3에서 변환된 노트북 복원
@@ -438,7 +437,7 @@ S3 버킷명을 인자로 받도록 해줘.
 > **핵심**: 새 EMR 7.x의 기본 interpreter.json을 단순 덮어쓰기하면 안 된다. 기존 커스텀 설정값만 머지해야 한다.
 
 ```
-프롬프트: 03-intel-to-graviton-guide.md의 interpreter.json 머지 스크립트를
+예시 프롬프트: 03-intel-to-graviton-guide.md의 interpreter.json 머지 스크립트를
 참고해서, 기존 interpreter.json과 새 EMR 기본 interpreter.json을
 안전하게 머지하는 Python 스크립트를 만들어줘.
 새 EMR 기본 설정의 구조를 유지하면서, Python/PySpark 인터프리터 경로만
@@ -449,7 +448,7 @@ S3 버킷명을 인자로 받도록 해줘.
 ### 9.3 cron job 검토 및 적용
 
 ```
-프롬프트: S3에서 다운로드한 crontab-backup.txt를 읽고,
+예시 프롬프트: S3에서 다운로드한 crontab-backup.txt를 읽고,
 각 cron job이 새 Graviton 환경에서 그대로 동작할 수 있는지 분석해줘.
 Python 경로, 스크립트 경로 등이 변경되어야 하는 항목을 찾아서
 수정된 crontab 파일을 생성해줘.
@@ -464,7 +463,7 @@ Python 경로, 스크립트 경로 등이 변경되어야 하는 항목을 찾�
 ### 10.1 연결 검증 스크립트 자동 생성
 
 ```
-프롬프트: 새 Graviton EMR 클러스터에서 모든 데이터 소스 연결을
+예시 프롬프트: 새 Graviton EMR 클러스터에서 모든 데이터 소스 연결을
 자동으로 검증하는 bash 스크립트를 만들어줘.
 03-intel-to-graviton-guide.md의 §7(네트워크 및 데이터 소스 연결 검증)을
 참고해서 다음을 순서대로 검증해야 해:
@@ -480,7 +479,7 @@ Python 경로, 스크립트 경로 등이 변경되어야 하는 항목을 찾�
 ### 10.2 보안그룹 규칙 비교
 
 ```
-프롬프트: 기존 Intel 클러스터와 새 Graviton 클러스터에 할당된
+예시 프롬프트: 기존 Intel 클러스터와 새 Graviton 클러스터에 할당된
 보안그룹의 인바운드/아웃바운드 규칙을 비교해줘.
 기존 클러스터 ID와 새 클러스터 ID를 인자로 받아서,
 규칙 차이가 있으면 경고를 출력하는 스크립트를 만들어줘.
@@ -489,7 +488,7 @@ Python 경로, 스크립트 경로 등이 변경되어야 하는 항목을 찾�
 ### 10.3 IAM 역할 권한 감사
 
 ```
-프롬프트: 새 Graviton 클러스터에 할당된 IAM 역할이 기존 환경과
+예시 프롬프트: 새 Graviton 클러스터에 할당된 IAM 역할이 기존 환경과
 동일한 권한을 가지고 있는지 검증해줘.
 S3 버킷 접근, Glue Data Catalog 접근, CloudWatch Logs 접근 등
 핵심 권한이 모두 있는지 확인하고, 누락된 권한이 있으면 보고해줘.
@@ -502,7 +501,7 @@ S3 버킷 접근, Glue Data Catalog 접근, CloudWatch Logs 접근 등
 ### 11.1 테스트 스크립트 자동 생성
 
 ```
-프롬프트: 03-intel-to-graviton-guide.md의 통합 테스트 섹션을 참고해서,
+예시 프롬프트: 03-intel-to-graviton-guide.md의 통합 테스트 섹션을 참고해서,
 신규 Graviton EMR 클러스터의 상태를 자동으로 검증하는
 bash 스크립트를 만들어줘. 다음을 순서대로 검증해야 해:
 1. Zeppelin UI HTTP 200 응답
@@ -517,14 +516,14 @@ bash 스크립트를 만들어줘. 다음을 순서대로 검증해야 해:
 작업이 진행되면 Kiro에 체크리스트 업데이트를 요청한다:
 
 ```
-프롬프트: 04-migration-checklist.md에서 Phase 0의 0-1 ~ 0-7 항목을
+예시 프롬프트: 04-migration-checklist.md에서 Phase 0의 0-1 ~ 0-7 항목을
 완료(☐ → ☑)로 변경해줘. 날짜는 오늘, 담당자는 "홍길동"으로 기입해줘.
 ```
 
 ### 11.3 Go/No-Go 판정 보조
 
 ```
-프롬프트: 04-migration-checklist.md의 Go/No-Go 판정 기준을 읽고,
+예시 프롬프트: 04-migration-checklist.md의 Go/No-Go 판정 기준을 읽고,
 test-results.json의 테스트 결과와 대조해서
 각 항목의 합격/불합격 여부를 판정해줘.
 No-Go 항목이 있으면 원인과 해결 방안도 제시해줘.
@@ -535,7 +534,7 @@ No-Go 항목이 있으면 원인과 해결 방안도 제시해줘.
 문제가 발생했을 때 Kiro에 즉시 지원을 요청한다:
 
 ```
-프롬프트: Graviton 클러스터에서 다음 오류가 발생하고 있어:
+예시 프롬프트: Graviton 클러스터에서 다음 오류가 발생하고 있어:
 [오류 메시지 붙여넣기]
 03-intel-to-graviton-guide.md의 롤백 트리거 조건에 해당하는지 판단하고,
 롤백 없이 해결 가능하면 해결 방법을,
