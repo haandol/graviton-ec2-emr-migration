@@ -1,12 +1,12 @@
 # Intel → Graviton 전환 가이드
 
-> **EMR Graviton4 마이그레이션 — Phase 2~5 상세 (EMR 업그레이드, Zeppelin 설정, ARM64 전환, S3 이관, IaC 자동화, 데이터 복원, 네트워크 검증)**
+> **EMR Graviton4 마이그레이션 — Phase 3~5 상세 (Zeppelin 설정, ARM64 전환, S3 이관, IaC 자동화, 데이터 복원, 네트워크 검증)**
 
 ---
 
 ## 목차
 
-1. [Phase 2: EMR 버전 업그레이드](#1-phase-2-emr-버전-업그레이드)
+1. [EMR 버전 업그레이드 — 목표 릴리스 선정](#1-emr-버전-업그레이드--목표-릴리스-선정)
 2. [Phase 3: Zeppelin 업그레이드](#2-phase-3-zeppelin-업그레이드)
 3. [Phase 4: Graviton4(ARM64) 인스턴스 전환](#3-phase-4-graviton4arm64-인스턴스-전환)
 4. [Phase 3.5: S3 이관 허브 구성 및 데이터 이관](#4-phase-35-s3-이관-허브-구성-및-데이터-이관)
@@ -20,9 +20,7 @@
 
 ---
 
-## 1. Phase 2: EMR 버전 업그레이드
-
-### 1.1 목표 EMR 릴리스 선정
+## 1. EMR 버전 업그레이드 — 목표 릴리스 선정
 
 | EMR 릴리스 | Spark  | Zeppelin | Graviton 지원   | 권장     |
 | ---------- | ------ | -------- | --------------- | -------- |
@@ -31,65 +29,7 @@
 
 > **권장**: EMR 7.x를 선택한다. Graviton을 공식 지원하며 최신 Spark 3.5+ 및 Zeppelin 0.10.1이 번들로 포함된다.
 
-### 1.2 Spark 2.x → 3.x 주요 변경점 및 코드 수정 가이드
-
-#### API 변경 요약
-
-| 항목                         | Spark 2.x              | Spark 3.x                  | 수정 방법            |
-| ---------------------------- | ---------------------- | -------------------------- | -------------------- |
-| `SparkSession.builder`       | 동일                   | 동일                       | 변경 없음            |
-| `DataFrame.toDF()`           | 동일                   | 동일                       | 변경 없음            |
-| `pandas_udf` (PandasUDFType) | `PandasUDFType.SCALAR` | `PandasUDFType` deprecated | 데코레이터 방식 사용 |
-| CSV 파싱                     | 관대한 파싱            | 엄격한 파싱                | `mode` 옵션 확인     |
-| 암시적 타입 캐스팅           | 허용                   | 제한됨                     | 명시적 `cast()` 사용 |
-| `spark.sql.legacy.*`         | —                      | 호환 설정 제공             | 필요시 설정 추가     |
-
-#### 주요 코드 수정 예시
-
-```python
-# Spark 2.x: createDataFrame에서 암시적 타입 변환
-df = spark.createDataFrame([(1, "a"), (2, None)])
-
-# Spark 3.x: 스키마 명시 권장
-from pyspark.sql.types import StructType, StructField, IntegerType, StringType
-schema = StructType([
-    StructField("id", IntegerType(), False),
-    StructField("value", StringType(), True)
-])
-df = spark.createDataFrame([(1, "a"), (2, None)], schema=schema)
-```
-
-```python
-# Spark 2.x: pandas_udf 데코레이터
-from pyspark.sql.functions import pandas_udf, PandasUDFType
-
-@pandas_udf("double", PandasUDFType.SCALAR)
-def multiply(a, b):
-    return a * b
-
-# Spark 3.x: 간소화된 데코레이터
-from pyspark.sql.functions import pandas_udf
-
-@pandas_udf("double")
-def multiply(a: pd.Series, b: pd.Series) -> pd.Series:
-    return a * b
-```
-
-#### 호환성 설정 (임시 사용)
-
-마이그레이션 초기에 Spark 2.x 동작을 유지해야 할 경우 아래 설정을 사용할 수 있다:
-
-```properties
-# spark-defaults.conf (임시 호환 설정)
-spark.sql.legacy.timeParserPolicy=LEGACY
-# spark.sql.legacy.createHiveTableByDefault=true  # Spark 3.x에서는 이미 기본값이 Hive이므로 불필요. Spark 4.0+ 전환 시 필요.
-spark.sql.legacy.allowNonEmptyLocationInCTAS=true
-spark.sql.adaptive.enabled=true  # Spark 3.2+부터 기본값 true이므로 중복 설정이나 명시적 선언용
-```
-
-> **주의**: `spark.sql.legacy.*` 설정은 임시 조치이며, 최종적으로 Spark 3.x 네이티브 방식으로 코드를 수정해야 한다.
-
-### 1.3 EMR Configurations 매핑
+### 1.1 EMR Configurations 매핑
 
 ```json
 [
@@ -328,7 +268,6 @@ s3://my-emr-migration-hub/
 │   └── converted-py3/     # Python 3 변환 완료 노트북
 ├── config/
 │   ├── zeppelin-conf/     # zeppelin-site.xml, shiro.ini, interpreter.json 등
-│   ├── spark/             # spark-defaults.conf, spark-env.sh
 │   └── crontab-backup.txt
 ├── packages/
 │   ├── requirements-current-py2.txt
@@ -355,25 +294,19 @@ aws s3 sync /path/to/converted-notebooks/ \
 aws s3 sync /usr/lib/zeppelin/conf/ \
   ${S3_BUCKET}/config/zeppelin-conf/
 
-# 3) Spark 설정 (커스텀 설정이 있는 경우)
-aws s3 cp /etc/spark/conf/spark-defaults.conf \
-  ${S3_BUCKET}/config/spark/
-aws s3 cp /etc/spark/conf/spark-env.sh \
-  ${S3_BUCKET}/config/spark/
-
-# 4) Python 패키지 목록
+# 3) Python 패키지 목록
 aws s3 cp requirements-current-py2.txt ${S3_BUCKET}/packages/
 aws s3 cp requirements-py3.txt ${S3_BUCKET}/packages/
 
-# 5) 커스텀 스크립트, cron jobs, 기타 설정
+# 4) 커스텀 스크립트, cron jobs, 기타 설정
 aws s3 sync /home/hadoop/scripts/ ${S3_BUCKET}/custom-scripts/
 crontab -l > /tmp/crontab-backup.txt
 aws s3 cp /tmp/crontab-backup.txt ${S3_BUCKET}/config/crontab-backup.txt
 
-# 6) HDFS 데이터 (필요시)
+# 5) HDFS 데이터 (필요시)
 hadoop distcp hdfs:///user/hadoop/data ${S3_BUCKET}/hdfs-data/
 
-# 7) Hive Metastore 덤프 (Hive 사용시)
+# 6) Hive Metastore 덤프 (Hive 사용시)
 # EMR은 기본적으로 Glue Data Catalog를 사용하므로 별도 이관 불필요할 수 있음
 # 로컬 Hive Metastore인 경우:
 mysqldump -u root hive_metastore > /tmp/hive-metastore-dump.sql
@@ -478,98 +411,7 @@ resource "aws_emr_cluster" "zeppelin_migration" {
 }
 ```
 
-### 4.2 CloudFormation YAML 예시
-
-```yaml
-Resources:
-  ZeppelinCluster:
-    Type: AWS::EMR::Cluster
-    Properties:
-      Name: ZeppelinCluster
-      ReleaseLabel: emr-7.0.0
-      Instances:
-        MasterInstanceGroup:
-          InstanceCount: 1
-          InstanceType: m8g.xlarge
-        CoreInstanceGroup:
-          InstanceCount: 2
-          InstanceType: m8g.xlarge
-        Ec2SubnetId: !Ref SubnetId
-        Ec2KeyName: !Ref KeyPairName
-        EmrManagedMasterSecurityGroup: !Ref MasterSG
-        EmrManagedSlaveSecurityGroup: !Ref CoreSG
-      Applications:
-        - Name: Zeppelin
-        - Name: Spark
-      Configurations:
-        - Classification: spark-env
-          Configurations:
-            - Classification: export
-              ConfigurationProperties:
-                PYSPARK_PYTHON: /usr/bin/python3
-                PYSPARK_DRIVER_PYTHON: /usr/bin/python3
-        - Classification: zeppelin-site
-          ConfigurationProperties:
-            zeppelin.server.port: "8890"
-            zeppelin.server.addr: "0.0.0.0"
-      JobFlowRole: !Ref EMRInstanceProfile
-      ServiceRole: !Ref EMRServiceRole
-      Tags:
-        - Key: Environment
-          Value: production
-        - Key: Migration
-          Value: graviton4
-```
-
-### 4.3 AWS CDK `CfnCluster` 예시
-
-```typescript
-import * as emr from "aws-cdk-lib/aws-emr";
-
-const cluster = new emr.CfnCluster(this, "ZeppelinCluster", {
-  name: "ZeppelinCluster",
-  releaseLabel: "emr-7.0.0",
-  instances: {
-    masterInstanceGroup: {
-      instanceCount: 1,
-      instanceType: "m8g.xlarge",
-    },
-    coreInstanceGroup: {
-      instanceCount: 2,
-      instanceType: "m8g.xlarge",
-    },
-    ec2SubnetId: vpc.selectSubnets({
-      subnetType: SubnetType.PRIVATE_WITH_EGRESS,
-    }).subnetIds[0],
-  },
-  applications: [{ name: "Zeppelin" }, { name: "Spark" }],
-  configurations: [
-    {
-      classification: "zeppelin-site",
-      configurationProperties: {
-        "zeppelin.server.port": "8890",
-        "zeppelin.server.addr": "0.0.0.0",
-      },
-    },
-    {
-      classification: "spark-env",
-      configurations: [
-        {
-          classification: "export",
-          configurationProperties: {
-            PYSPARK_PYTHON: "/usr/bin/python3",
-            PYSPARK_DRIVER_PYTHON: "/usr/bin/python3",
-          },
-        },
-      ],
-    },
-  ],
-  jobFlowRole: emrInstanceProfile.attrArn,
-  serviceRole: emrServiceRole.roleArn,
-});
-```
-
-### 4.4 부트스트랩 스크립트: Python 3 환경 셋업 및 Zeppelin 설치 자동화
+### 4.2 부트스트랩 스크립트: Python 3 환경 셋업 및 Zeppelin 설치 자동화
 
 ```bash
 #!/bin/bash
@@ -608,7 +450,7 @@ ENVEOF
 echo "부트스트랩 완료"
 ```
 
-### 4.5 노트북 S3 동기화 스크립트
+### 4.3 노트북 S3 동기화 스크립트
 
 ```bash
 #!/bin/bash
